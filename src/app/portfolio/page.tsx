@@ -1,7 +1,22 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import EmailDropdown from "./EmailDropdown";
 import PortfolioNav from "./PortfolioNav";
 import ProjectsSection from "./ProjectsSection";
+
+export const metadata: Metadata = {
+  title: "Portfolio",
+  description:
+    "Projects, experience, and life outside of code — the long-form portfolio of Nishanth Jadav, a Software Engineer studying CS + Math at Villanova.",
+  openGraph: {
+    title: "Portfolio · Nishanth Jadav",
+    description:
+      "Projects, experience, and life outside of code — the long-form portfolio of Nishanth Jadav.",
+    url: "/portfolio",
+    type: "website",
+  },
+  alternates: { canonical: "/portfolio" },
+};
 
 type ExperienceEntry = {
   company: string;
