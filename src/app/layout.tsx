@@ -20,7 +20,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: {
     // Per-page `metadata.title` fills the %s slot; root pages use the default.
-    default: "Nishanth Jadav — Software Engineer",
+    default: "Nishanth Jadav",
     template: "%s · Nishanth Jadav",
   },
   description:
