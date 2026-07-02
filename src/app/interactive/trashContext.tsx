@@ -14,6 +14,8 @@ type TrashContextValue = {
   items: TrashedItem[];
   /** Remove one item from the trash and put it back on the desktop. */
   restore: (id: string) => void;
+  /** Empty the bin, returning every item to its original desktop position. */
+  restoreAll: () => void;
 };
 
 const TrashContext = createContext<TrashContextValue | null>(null);
@@ -21,10 +23,11 @@ const TrashContext = createContext<TrashContextValue | null>(null);
 export function TrashProvider({
   items,
   restore,
+  restoreAll,
   children,
 }: TrashContextValue & { children: ReactNode }) {
   return (
-    <TrashContext.Provider value={{ items, restore }}>{children}</TrashContext.Provider>
+    <TrashContext.Provider value={{ items, restore, restoreAll }}>{children}</TrashContext.Provider>
   );
 }
 

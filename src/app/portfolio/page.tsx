@@ -1,4 +1,5 @@
 import Link from "next/link";
+import EmailDropdown from "./EmailDropdown";
 import PortfolioNav from "./PortfolioNav";
 import ProjectsSection from "./ProjectsSection";
 
@@ -191,10 +192,10 @@ export default function Portfolio() {
           </figure>
 
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-1 text-sm">
-            <a href="mailto:nishanthjadav@gmail.com" className="underline underline-offset-4 hover:text-muted transition-colors">Email</a>
+            <EmailDropdown />
             <a href="https://github.com/nishanthjadav" className="underline underline-offset-4 hover:text-muted transition-colors">GitHub</a>
             <a href="https://linkedin.com/in/nishanthjadav" className="underline underline-offset-4 hover:text-muted transition-colors">LinkedIn</a>
-            <a href="/resume.pdf" className="underline underline-offset-4 hover:text-muted transition-colors">Resume</a>
+            <a href="/Nishanth_Jadav_Resume.pdf" target="_blank" rel="noreferrer" className="underline underline-offset-4 hover:text-muted transition-colors">Resume</a>
           </div>
         </section>
 

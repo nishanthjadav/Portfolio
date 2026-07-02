@@ -23,7 +23,7 @@ export type WindowState = {
   restore?: { x: number; y: number; width: number; height: number };
 };
 
-export type AppId = "notepad" | "explorer" | "image-viewer" | "about-computer" | "trash";
+export type AppId = "notepad" | "explorer" | "image-viewer" | "pdf-viewer" | "about-computer" | "trash" | "display-properties";
 
 type State = {
   windows: WindowState[];
@@ -50,8 +50,10 @@ const DEFAULTS: Record<AppId, { width: number; height: number }> = {
   notepad: { width: 640, height: 560 },
   explorer: { width: 640, height: 440 },
   "image-viewer": { width: 640, height: 520 },
+  "pdf-viewer": { width: 760, height: 820 },
   "about-computer": { width: 360, height: 260 },
   trash: { width: 520, height: 380 },
+  "display-properties": { width: 520, height: 440 },
 };
 
 function cascadeOffset(n: number) {

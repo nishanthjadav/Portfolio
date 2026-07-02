@@ -21,6 +21,8 @@ export default function Explorer({ payload }: { payload: unknown }) {
     } else if (child.type === "shortcut") {
       // Shortcuts leave the OS entirely — open the external URL in a new tab.
       globalThis.open(child.href, "_blank", "noopener,noreferrer");
+    } else if (child.type === "pdf") {
+      dispatch({ type: "OPEN", appId: "pdf-viewer", title: child.name, payload: { path: child.path } });
     } else {
       dispatch({ type: "OPEN", appId: "image-viewer", title: child.name, payload: { path: child.path } });
     }
@@ -85,6 +87,7 @@ function FSIcon({ node }: { node: FSNode }) {
   if (node.type === "folder") return <FolderIcon />;
   if (node.type === "image") return <ImagePreviewIcon src={node.src} />;
   if (node.type === "shortcut") return <ShortcutIcon />;
+  if (node.type === "pdf") return <PdfIcon />;
   return <TextIcon />;
 }
 
@@ -125,6 +128,27 @@ function TextIcon() {
       {[12, 16, 20, 24, 28].map((y) => (
         <line key={y} x1="8" y1={y} x2="26" y2={y} stroke="#3b73b9" />
       ))}
+    </svg>
+  );
+}
+
+function PdfIcon() {
+  return (
+    <svg width="32" height="40" viewBox="0 0 32 40" xmlns="http://www.w3.org/2000/svg">
+      <path d="M4 2 h18 l6 6 v30 H4z" fill="#ffffff" stroke="#5a5a5a" />
+      <path d="M22 2 v6 h6" fill="none" stroke="#5a5a5a" />
+      <rect x="5" y="22" width="18" height="10" rx="2" fill="#c8102e" />
+      <text
+        x="14"
+        y="30"
+        textAnchor="middle"
+        fontFamily="Tahoma, Arial, sans-serif"
+        fontSize="7"
+        fontWeight="700"
+        fill="#ffffff"
+      >
+        PDF
+      </text>
     </svg>
   );
 }

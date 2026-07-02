@@ -8,7 +8,7 @@ import { useTrash } from "../trashContext";
  * closing this window just leaves items in the trash.
  */
 export default function Trash() {
-  const { items, restore } = useTrash();
+  const { items, restore, restoreAll } = useTrash();
 
   return (
     <div className="w-full h-full flex flex-col" style={{ background: "#ffffff" }}>
@@ -24,6 +24,34 @@ export default function Trash() {
           </span>
         ))}
       </div>
+
+      {/*
+        Action bar — sits below the fake menu, contains the real "Restore all"
+        affordance. Only rendered when there's something to restore so an
+        empty bin doesn't advertise a no-op button.
+      */}
+      {items.length > 0 ? (
+        <div
+          className="flex items-center gap-2 px-2 py-1 border-b"
+          style={{ borderColor: "#c7c7c7", background: "#f7f7f7" }}
+        >
+          <button
+            type="button"
+            onClick={restoreAll}
+            className="px-2 py-0.5 text-[11px] hover:bg-[#316ac5] hover:text-white"
+            style={{
+              border: "1px solid #7f7f7f",
+              borderRadius: 3,
+              background: "linear-gradient(to bottom, #ffffff, #d6d6d6)",
+            }}
+          >
+            Restore all items
+          </button>
+          <span className="text-[10px] text-gray-600 italic">
+            Puts every trashed icon back on the desktop.
+          </span>
+        </div>
+      ) : null}
 
       <div className="flex-1 overflow-auto p-3">
         {items.length === 0 ? (

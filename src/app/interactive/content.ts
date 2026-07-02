@@ -1,7 +1,7 @@
-export const readme = `Welcome to Nishanth OS v1.0.
+export const readme = `Welcome to nishOS.
 
-Thanks for stopping by. This is a portfolio pretending to be an old computer
-from ~2003. Feel free to click around.
+Thanks for stopping by. This is a 100% custom OS written in C modeled after retro
+Windows (the source code was on a USB drive that I've since misplaced).
 
 Getting started:
   * Double-click any icon on the desktop to open it.
@@ -11,13 +11,13 @@ Getting started:
   * Click Start (bottom-left) to open the menu.
 
 Highlights:
-  * Resume.txt   — my resume in plain text.
+  * Resume.pdf   — my resume, opens in the PDF viewer.
   * About.txt    — a little about me.
   * Projects/    — folder with screenshots + descriptions for each project.
   * Photos/      — snapshots from life outside of code.
   * My Computer  — system info, if you're curious.
 
-Regular portfolio is one click away: Start > Log Off > Exit to Website.
+Regular portfolio is two clicks away: Start > Log Off > Exit to Website.
 
 Have fun.
 
@@ -26,57 +26,22 @@ Have fun.
 
 export const about = `Hi, I'm Nishanth.
 
-I'm a CS + Math student at Villanova ('28). I like building things that are
-either useful or unnecessary but delightful — this website is trying to
-be both.
+I'm a current junior at Villanova ('28) double majoring in computer science and math. 
+I like building things that are either useful or interesting. 
+This website is trying to be both.
 
 Currently interning on cloud infrastructure at SAP. Previously interned at
 Frigate (fintech, early-stage) and have been doing research + web work at
 Villanova since fall '24.
 
-Outside of code: I play on Villanova's badminton club team, cook enough
-that I have a Beli account (@nishanth1), and travel whenever schoolwork
-permits.
+Outside of code: I'm the president of Villanova's badminton club team, love trying 
+new food [Beli account: @nishanth1], and try to travel as much as I can.
 
-The best way to reach me is nishanthjadav@gmail.com.
+The best way to reach me is nishanthjadav@gmail.com (personal) or
+njadav@villanova.edu (school).
 `;
 
-export const resume = `NISHANTH JADAV
-nishanthjadav@gmail.com  |  github.com/nishanthjadav  |  linkedin.com/in/nishanthjadav
 
-EDUCATION
-  Villanova University                                          Aug 2024 - May 2028
-    B.S. Computer Science, B.S. Mathematics
-
-EXPERIENCE
-  SAP - Software Engineering Intern                              May 2026 - Present
-    Cloud infrastructure.
-
-  Frigate - Software Engineering Intern                          May 2025 - Aug 2025
-    Building fintech at an early-stage startup.
-
-  Villanova University - Research Assistant, Developer Intern   Aug 2024 - Present
-    Military vehicle CNN research. Maintained villanova.edu/university.
-
-PROJECTS
-  Politician Trade Copier (2026)
-    Scrapes CapitolTrades daily, flags unusual trades with an Isolation Forest
-    anomaly model, and mirrors any politician's fills into an Alpaca brokerage
-    account with live P&L.
-
-  Desk Watcher (2026)
-    Fuses a MediaPipe pose classifier with YOLOv8 phone detection to log
-    sips, breaks, and focus time in real time. Local-only — video never
-    leaves the machine.
-
-  Project Euler Solutions (2023 - Present)
-    Ongoing collection of solutions to Project Euler problems.
-
-SKILLS
-  Languages   Python, TypeScript, JavaScript, Go, C++, SQL
-  Frameworks  React, Next.js, Node, FastAPI, PyTorch
-  Tools       Git, Docker, Postgres, AWS, GCP
-`;
 
 export const politicianTrackerDesc = `POLITICIAN TRADE COPIER  (2026)
 --------------------------------
@@ -99,7 +64,7 @@ Visualize your productivity, phone usage, lunch break length, and so on.
 
 * Fuses a MediaPipe pose classifier with YOLOv8 phone detection to log
   sips, breaks, and focus in real time.
-* Local-only. Video never leaves your machine — only pose keypoints and
+* Local-only. Video never leaves your machine; only pose keypoints and
   activity labels are stored.
 
 GitHub: https://github.com/nishanthjadav/Desk-Watcher

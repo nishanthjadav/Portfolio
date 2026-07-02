@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useWindowManager } from "./windowManager";
 
 type Props = {
   onStartClick: () => void;
   startOpen: boolean;
+  /** Kick off the log-off animation instead of navigating away directly. */
+  onLogOff: () => void;
 };
 
 /**
@@ -14,7 +15,7 @@ type Props = {
  * Right: clock. We tick the clock only after mount to avoid a server/client
  * hydration mismatch, since the initial time would differ between renders.
  */
-export default function Taskbar({ onStartClick, startOpen }: Props) {
+export default function Taskbar({ onStartClick, startOpen, onLogOff }: Props) {
   const { state, dispatch } = useWindowManager();
   const [now, setNow] = useState<string>("");
 
@@ -50,6 +51,11 @@ export default function Taskbar({ onStartClick, startOpen }: Props) {
   return (
     <div
       className="fixed bottom-0 left-0 right-0 h-[40px] flex items-stretch z-[9999]"
+      onContextMenu={(e) => {
+        // Right-clicking the taskbar shouldn't open the desktop's wallpaper
+        // picker — this is its own chrome. Native menu still works.
+        e.stopPropagation();
+      }}
       style={{
         background:
           "linear-gradient(to bottom, #2564d8 0%, #1e50c0 6%, #245edd 20%, #2367e2 60%, #1c58c4 90%, #1548a4 100%)",
@@ -126,15 +132,17 @@ export default function Taskbar({ onStartClick, startOpen }: Props) {
         {now}
       </div>
 
-      {/* Small "back to real site" link, right-aligned tray-adjacent */}
-      <Link
-        href="/"
-        className="h-full px-2 flex items-center text-[10px] text-white/90 hover:text-white"
+      {/* Power button — triggers the same log-off animation as Start > Log Off. */}
+      <button
+        type="button"
+        onClick={onLogOff}
+        className="h-full px-2 flex items-center text-[14px] text-white/90 hover:text-white"
         style={{ background: "linear-gradient(to bottom, #0d75c5 0%, #0857a3 100%)" }}
-        title="Exit to portfolio"
+        title="Log off"
+        aria-label="Log off"
       >
         ⏻
-      </Link>
+      </button>
     </div>
   );
 }

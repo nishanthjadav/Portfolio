@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import DesktopIcon from "./DesktopIcon";
 import StartMenu from "./StartMenu";
 import Taskbar from "./Taskbar";
@@ -8,17 +8,35 @@ import Window from "./Window";
 import Notepad from "./apps/Notepad";
 import Explorer from "./apps/Explorer";
 import ImageViewer from "./apps/ImageViewer";
+import PdfViewer from "./apps/PdfViewer";
 import AboutComputer from "./apps/AboutComputer";
 import Trash from "./apps/Trash";
+import DisplayProperties from "./apps/DisplayProperties";
+import LogOffSequence from "./LogOffSequence";
 import { ROOT } from "./fileSystem";
 import { TrashProvider, type TrashedItem } from "./trashContext";
 import { useWindowManager, type WindowState } from "./windowManager";
+import {
+  DEFAULT_WALLPAPER_ID,
+  OVERLAY_PATTERN_URL,
+  findWallpaper,
+} from "./wallpapers";
+import { WallpaperProvider, useDesktopWallpaper } from "./wallpaperContext";
+
+// localStorage key for the user's wallpaper choice. Namespaced so it doesn't
+// collide with anything else on the same origin.
+const WALLPAPER_STORAGE_KEY = "nishos-wallpaper";
 
 /**
  * Free-form desktop-icon layout. Each icon has its own (x, y) so users can
  * drag them anywhere. Starting positions mimic the old fixed left-column grid.
  */
 type IconId = "my-computer" | "projects" | "photos" | "resume" | "about" | "readme" | "system-info";
+
+// Icons that are structurally part of the OS metaphor and can't be trashed —
+// dropping them on the Recycle Bin is a no-op and the icon snaps back to where
+// it came from. Everything else is fair game.
+const UNTRASHABLE: ReadonlySet<IconId> = new Set(["my-computer", "system-info"]);
 
 type IconEntry = {
   id: IconId;
@@ -31,11 +49,17 @@ const COL_X = 12;
 const ROW_Y0 = 12;
 const ROW_STEP = 82;
 
+// DesktopIcon renders itself at `width: ICON_W` inside an 86×74 slot. Mirror
+// those numbers here so we can hit-test drops against the bin without needing
+// to read DOM geometry (its wrapper is a zero-size flow div — see below).
+const ICON_W = 86;
+const ICON_H = 74;
+
 const INITIAL_ICONS: IconEntry[] = [
   { id: "my-computer", label: "My Computer", x: COL_X, y: ROW_Y0 + ROW_STEP * 0 },
   { id: "projects", label: "Projects", x: COL_X, y: ROW_Y0 + ROW_STEP * 1 },
   { id: "photos", label: "Photos", x: COL_X, y: ROW_Y0 + ROW_STEP * 2 },
-  { id: "resume", label: "Resume.txt", x: COL_X, y: ROW_Y0 + ROW_STEP * 3 },
+  { id: "resume", label: "Resume.pdf", x: COL_X, y: ROW_Y0 + ROW_STEP * 3 },
   { id: "about", label: "About.txt", x: COL_X, y: ROW_Y0 + ROW_STEP * 4 },
   { id: "readme", label: "README.txt", x: COL_X, y: ROW_Y0 + ROW_STEP * 5 },
   { id: "system-info", label: "System Info", x: COL_X, y: ROW_Y0 + ROW_STEP * 6 },
@@ -55,12 +79,34 @@ export default function Desktop() {
   const [startOpen, setStartOpen] = useState(false);
   const [icons, setIcons] = useState<IconEntry[]>(INITIAL_ICONS);
   const [trash, setTrash] = useState<IconEntry[]>([]);
+  // Wallpaper id starts at the default so SSR + first client render match.
+  // A useEffect below rehydrates from localStorage on mount.
+  const [wallpaperId, setWallpaperId] = useState<string>(DEFAULT_WALLPAPER_ID);
+  // Right-click context menu — null when closed. `x, y` is a client-space
+  // point where the menu should anchor its top-left.
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  // Flipped to true when the user picks Log Off (from Start or the taskbar's
+  // ⏻ button). While true, the LogOffSequence overlay renders on top of
+  // everything and drives the exit navigation.
+  const [loggingOff, setLoggingOff] = useState(false);
+
+  useEffect(() => {
+    const saved = globalThis.localStorage?.getItem(WALLPAPER_STORAGE_KEY);
+    if (saved) setWallpaperId(saved);
+  }, []);
+
+  const changeWallpaper = (id: string) => {
+    setWallpaperId(id);
+    globalThis.localStorage?.setItem(WALLPAPER_STORAGE_KEY, id);
+  };
+
+  const wallpaper = findWallpaper(wallpaperId);
 
   // Recycle Bin lives in the top-right corner initially, but the user can drag
-  // it too. We keep its position in state and store its DOM ref so we can
-  // read its rect at drop time.
+  // it too. We keep its position in state and derive the drop-target rect from
+  // that state — reading the wrapping DOM node would give a zero-size rect
+  // (the icon is `position: absolute` translated inside a flow div).
   const [trashPos, setTrashPos] = useState({ x: 0, y: ROW_Y0 });
-  const trashRef = useRef<HTMLDivElement | null>(null);
 
   // Anchor the Recycle Bin's initial x to the right edge on mount. Doing this
   // in an effect (rather than at state init) avoids a server/client mismatch
@@ -73,7 +119,11 @@ export default function Desktop() {
     dispatch({ type: "OPEN", appId: "explorer", title, payload: { path } });
   const openText = (path: string, title: string) =>
     dispatch({ type: "OPEN", appId: "notepad", title, payload: { path } });
+  const openPdf = (path: string, title: string) =>
+    dispatch({ type: "OPEN", appId: "pdf-viewer", title, payload: { path } });
   const openAbout = () => dispatch({ type: "OPEN", appId: "about-computer", title: "System Properties" });
+  const openDisplay = () =>
+    dispatch({ type: "OPEN", appId: "display-properties", title: "Display Properties" });
   const openTrash = () =>
     dispatch({
       type: "OPEN",
@@ -86,7 +136,7 @@ export default function Desktop() {
     "my-computer": { onOpen: () => openExplorer(ROOT.path, "My Computer"), icon: <MyComputerIcon /> },
     projects: { onOpen: () => openExplorer(`${ROOT.path}/Projects`, "Projects"), icon: <FolderIcon /> },
     photos: { onOpen: () => openExplorer(`${ROOT.path}/Photos`, "Photos"), icon: <FolderIcon /> },
-    resume: { onOpen: () => openText(`${ROOT.path}/Resume.txt`, "Resume.txt"), icon: <TextIcon /> },
+    resume: { onOpen: () => openPdf(`${ROOT.path}/Resume.pdf`, "Resume.pdf"), icon: <PdfIcon /> },
     about: { onOpen: () => openText(`${ROOT.path}/About.txt`, "About.txt"), icon: <TextIcon /> },
     readme: { onOpen: () => openText(`${ROOT.path}/README.txt`, "README.txt"), icon: <TextIcon /> },
     "system-info": { onOpen: openAbout, icon: <InfoIcon /> },
@@ -97,15 +147,21 @@ export default function Desktop() {
   };
 
   /**
-   * Was a drop released over the Recycle Bin? Uses the bin's live bounding
-   * rect, so it stays accurate even after the bin has been dragged.
+   * Was a drop released over the Recycle Bin? Derived from `trashPos` + the
+   * icon's fixed slot dimensions, so it stays accurate even after the bin has
+   * been dragged. Doesn't rely on `getBoundingClientRect`, which returns zero
+   * for the bin's flow-div wrapper.
    */
-  const isOverTrash = useCallback((clientX: number, clientY: number) => {
-    const el = trashRef.current;
-    if (!el) return false;
-    const r = el.getBoundingClientRect();
-    return clientX >= r.left && clientX <= r.right && clientY >= r.top && clientY <= r.bottom;
-  }, []);
+  const isOverTrash = useCallback(
+    (clientX: number, clientY: number) => {
+      const left = trashPos.x;
+      const top = trashPos.y;
+      const right = left + ICON_W;
+      const bottom = top + ICON_H;
+      return clientX >= left && clientX <= right && clientY >= top && clientY <= bottom;
+    },
+    [trashPos.x, trashPos.y]
+  );
 
   const trashIcon = (entry: IconEntry) => {
     setIcons((prev) => prev.filter((it) => it.id !== entry.id));
@@ -116,10 +172,15 @@ export default function Desktop() {
     const found = trash.find((it) => it.id === id);
     if (!found) return;
     setTrash((prev) => prev.filter((it) => it.id !== id));
-    // Snap the restored icon somewhere visible near the top-left instead of its
-    // pre-trash coords, so it never lands hidden under a window or offscreen.
-    const bumped: IconEntry = { ...found, x: COL_X, y: ROW_Y0 + icons.length * ROW_STEP };
-    setIcons((prev) => [...prev, bumped]);
+    // Put the icon back exactly where it was before it hit the bin. Its
+    // stored (x, y) is the pre-trash position, so no bump/reflow is needed.
+    setIcons((prev) => [...prev, found]);
+  };
+
+  const restoreAllIcons = () => {
+    if (trash.length === 0) return;
+    setIcons((prev) => [...prev, ...trash]);
+    setTrash([]);
   };
 
   // Build the payload the Trash window needs — resolved icon elements per id.
@@ -130,19 +191,40 @@ export default function Desktop() {
   }));
 
   return (
-    <TrashProvider items={trashItems} restore={restoreIcon}>
+    <WallpaperProvider wallpaperId={wallpaperId} changeWallpaper={changeWallpaper}>
+      <TrashProvider items={trashItems} restore={restoreIcon} restoreAll={restoreAllIcons}>
       <div
         className="fixed inset-0 overflow-hidden select-none"
         onClick={() => {
-          // Any click on the desktop dismisses the Start menu.
+          // Any click on the desktop dismisses transient overlays.
           if (startOpen) setStartOpen(false);
+          if (contextMenu) setContextMenu(null);
         }}
-        style={{
-          background:
-            // Bliss-ish teal-to-sky, softly clouded so it doesn't feel too clean.
-            "radial-gradient(1200px 700px at 30% 45%, #b8e8f0 0%, #7ecfe4 35%, #55b3d5 60%, #2a86b4 100%)",
+        onContextMenu={(e) => {
+          // Right-clicking empty desktop space opens the context menu. Icons
+          // and windows call stopPropagation on their own contextmenu events
+          // (see below), so this only fires on true "desktop background" hits.
+          e.preventDefault();
+          setStartOpen(false);
+          setContextMenu({ x: e.clientX, y: e.clientY });
         }}
+        style={{ background: wallpaper.background }}
       >
+        {/*
+          Retro-glyph overlay — a low-opacity repeating pattern of 4-pane flags,
+          floppies, CRTs, and cursors that sits on top of every wallpaper. Kept
+          in its own layer (rather than baked into each wallpaper) so it stays
+          consistent across the whole set. `pointer-events-none` so it doesn't
+          swallow clicks intended for the wallpaper / start menu dismisser.
+        */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            backgroundImage: OVERLAY_PATTERN_URL,
+            backgroundRepeat: "repeat",
+          }}
+        />
         {/* Free-form desktop icons — each absolutely positioned via its own x/y */}
         {icons.map((entry) => (
           <DesktopIcon
@@ -152,11 +234,13 @@ export default function Desktop() {
             y={entry.y}
             onMove={(x, y) => moveIcon(entry.id, x, y)}
             onDrop={(cx, cy) => {
-              if (isOverTrash(cx, cy)) {
-                trashIcon(entry);
-                return true;
-              }
-              return false;
+              if (!isOverTrash(cx, cy)) return false;
+              // System icons (My Computer, System Info) refuse to be trashed —
+              // consume the drop so DesktopIcon snaps the icon back to its
+              // original spot instead of leaving it visually behind the bin.
+              if (UNTRASHABLE.has(entry.id)) return true;
+              trashIcon(entry);
+              return true;
             }}
             onOpen={handlers[entry.id].onOpen}
             icon={handlers[entry.id].icon}
@@ -164,16 +248,14 @@ export default function Desktop() {
         ))}
 
         {/* Recycle Bin — draggable like any other icon; also a drop target. */}
-        <div ref={trashRef}>
-          <DesktopIcon
-            label={trash.length === 0 ? "Recycle Bin" : `Recycle Bin (${trash.length})`}
-            x={trashPos.x}
-            y={trashPos.y}
-            onOpen={openTrash}
-            onMove={(x, y) => setTrashPos({ x, y })}
-            icon={trash.length === 0 ? <TrashEmptyIcon /> : <TrashFullIcon />}
-          />
-        </div>
+        <DesktopIcon
+          label={trash.length === 0 ? "Recycle Bin" : `Recycle Bin (${trash.length})`}
+          x={trashPos.x}
+          y={trashPos.y}
+          onOpen={openTrash}
+          onMove={(x, y) => setTrashPos({ x, y })}
+          icon={trash.length === 0 ? <TrashEmptyIcon /> : <TrashFullIcon />}
+        />
 
         {/* Corner lockup — logo mark + wordmark, à la "Windows 7 Ultimate" */}
         <div
@@ -212,15 +294,42 @@ export default function Desktop() {
           </Window>
         ))}
 
-        {startOpen ? <StartMenu onClose={() => setStartOpen(false)} /> : null}
+        {startOpen ? (
+          <StartMenu
+            onClose={() => setStartOpen(false)}
+            onLogOff={() => setLoggingOff(true)}
+          />
+        ) : null}
 
-        <Taskbar startOpen={startOpen} onStartClick={() => setStartOpen((v) => !v)} />
+        {contextMenu ? (
+          <DesktopContextMenu
+            x={contextMenu.x}
+            y={contextMenu.y}
+            onClose={() => setContextMenu(null)}
+            onOpenDisplay={() => {
+              openDisplay();
+              setContextMenu(null);
+            }}
+          />
+        ) : null}
+
+        <Taskbar
+          startOpen={startOpen}
+          onStartClick={() => setStartOpen((v) => !v)}
+          onLogOff={() => setLoggingOff(true)}
+        />
+
+        {/* Log-off overlay. Sits on top of everything else and drives the
+            navigation to `/` once the animation finishes. */}
+        {loggingOff ? <LogOffSequence /> : null}
       </div>
     </TrashProvider>
+    </WallpaperProvider>
   );
 }
 
 function AppRenderer({ win }: { win: WindowState }) {
+  const wallpaperCtx = useDesktopWallpaper();
   switch (win.appId) {
     case "notepad":
       return <Notepad payload={win.payload} />;
@@ -228,13 +337,108 @@ function AppRenderer({ win }: { win: WindowState }) {
       return <Explorer payload={win.payload} />;
     case "image-viewer":
       return <ImageViewer payload={win.payload} />;
+    case "pdf-viewer":
+      return <PdfViewer payload={win.payload} />;
     case "about-computer":
       return <AboutComputer />;
     case "trash":
       return <Trash />;
+    case "display-properties":
+      return (
+        <DisplayProperties
+          currentId={wallpaperCtx.wallpaperId}
+          onSelect={wallpaperCtx.changeWallpaper}
+        />
+      );
     default:
       return null;
   }
+}
+
+/**
+ * Right-click context menu for the desktop wallpaper. Minimal XP-style
+ * dropdown — currently just "Properties" (opens Display Properties), but the
+ * shape is here for future entries (Refresh, Arrange Icons, etc.).
+ *
+ * Positioned in fixed coordinates from the right-click point. Clicking
+ * anywhere else closes it via the desktop's onClick — this component only
+ * renders the menu itself.
+ */
+function DesktopContextMenu({
+  x,
+  y,
+  onClose,
+  onOpenDisplay,
+}: {
+  x: number;
+  y: number;
+  onClose: () => void;
+  onOpenDisplay: () => void;
+}) {
+  // Nudge the menu so it never overflows the viewport. 180×~72 is a rough
+  // upper bound on the menu's rendered size; good enough for a small list.
+  const MENU_W = 180;
+  const MENU_H = 76;
+  const left = Math.min(x, globalThis.innerWidth - MENU_W - 4);
+  const top = Math.min(y, globalThis.innerHeight - MENU_H - 4);
+
+  return (
+    <div
+      className="fixed z-[9998]"
+      style={{
+        left,
+        top,
+        width: MENU_W,
+        background: "#f5f4ea",
+        border: "1px solid #7f7f7f",
+        boxShadow: "2px 2px 5px rgba(0,0,0,0.35)",
+        fontFamily: 'Tahoma, "MS Sans Serif", sans-serif',
+        fontSize: 11,
+        color: "#111",
+      }}
+      // Prevent clicks inside the menu from bubbling to the desktop's onClick,
+      // which would close it before the item's handler fires.
+      onClick={(e) => e.stopPropagation()}
+      onContextMenu={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+    >
+      <ul className="py-1">
+        <ContextMenuItem
+          label="Properties"
+          hint="Change wallpaper"
+          onClick={() => {
+            onOpenDisplay();
+            onClose();
+          }}
+        />
+      </ul>
+    </div>
+  );
+}
+
+function ContextMenuItem({
+  label,
+  hint,
+  onClick,
+}: {
+  label: string;
+  hint?: string;
+  onClick: () => void;
+}) {
+  return (
+    <li>
+      <button
+        type="button"
+        onClick={onClick}
+        className="w-full text-left px-3 py-1 flex items-center justify-between hover:bg-[#316ac5] hover:text-white"
+      >
+        <span>{label}</span>
+        {hint ? <span className="text-[9px] text-gray-500 group-hover:text-white/80">{hint}</span> : null}
+      </button>
+    </li>
+  );
 }
 
 // ── Icons ────────────────────────────────────────────────────────────────
@@ -264,6 +468,28 @@ function TextIcon() {
       {[18, 23, 28, 33, 38].map((y) => (
         <line key={y} x1="9" y1={y} x2="31" y2={y} stroke="#3b73b9" strokeWidth="1.2" />
       ))}
+    </svg>
+  );
+}
+function PdfIcon() {
+  // Same paper silhouette as TextIcon so the desktop reads as one style, with a
+  // red "PDF" badge in the corner to disambiguate at a glance.
+  return (
+    <svg width="40" height="48" viewBox="0 0 40 48">
+      <path d="M4 3 h22 l10 10 v32 H4z" fill="#ffffff" stroke="#4a4a4a" strokeWidth="1.5" />
+      <path d="M26 3 v10 h10" fill="none" stroke="#4a4a4a" strokeWidth="1.5" />
+      <rect x="6" y="28" width="22" height="12" rx="2" fill="#c8102e" />
+      <text
+        x="17"
+        y="37"
+        textAnchor="middle"
+        fontFamily="Tahoma, Arial, sans-serif"
+        fontSize="8"
+        fontWeight="700"
+        fill="#ffffff"
+      >
+        PDF
+      </text>
     </svg>
   );
 }

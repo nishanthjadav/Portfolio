@@ -101,7 +101,14 @@ export default function DesktopIcon({ label, x, y, onOpen, onMove, onDrop, icon 
         globalThis.addEventListener("click", cancelClick, true);
         // Give the parent a chance to consume this drop (e.g. trash bin hit).
         const consumed = onDrop ? onDrop(lastClientX, lastClientY) : false;
-        if (!consumed) onMove(nextX, nextY);
+        if (!consumed) {
+          onMove(nextX, nextY);
+        } else if (rootRef.current) {
+          // Parent consumed the drop but the icon might still exist (e.g. an
+          // untrashable icon rejected by the bin). Snap the DOM back to the
+          // authoritative prop coords, since the drag-time transform is stale.
+          rootRef.current.style.transform = `translate3d(${startX}px, ${startY}px, 0)`;
+        }
         setDragging(false);
       }
     }
@@ -121,6 +128,13 @@ export default function DesktopIcon({ label, x, y, onOpen, onMove, onDrop, icon 
         type="button"
         onMouseDown={onMouseDown}
         onDoubleClick={onOpen}
+        onContextMenu={(e) => {
+          // Suppress both the browser's native context menu and the desktop's
+          // "right-click on wallpaper" handler — right-clicking an icon
+          // shouldn't open the wallpaper picker.
+          e.preventDefault();
+          e.stopPropagation();
+        }}
         className={`w-full flex flex-col items-center gap-1 p-1 rounded outline-none focus:bg-white/10 focus:ring-1 focus:ring-white/40 hover:bg-white/5 ${
           dragging ? "opacity-70 cursor-grabbing" : "cursor-default"
         }`}

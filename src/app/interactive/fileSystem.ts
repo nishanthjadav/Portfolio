@@ -19,6 +19,13 @@ export type FSImageFile = {
   src: string; // URL under /pictures/...
 };
 
+export type FSPdfFile = {
+  type: "pdf";
+  path: string;
+  name: string;
+  src: string; // URL under /public
+};
+
 export type FSShortcut = {
   type: "shortcut";
   path: string;
@@ -33,7 +40,7 @@ export type FSFolder = {
   children: FSNode[];
 };
 
-export type FSNode = FSTextFile | FSImageFile | FSShortcut | FSFolder;
+export type FSNode = FSTextFile | FSImageFile | FSPdfFile | FSShortcut | FSFolder;
 
 // Helper to build a folder while keeping paths in sync with names.
 function folder(name: string, parent: string, children: (parentPath: string) => FSNode[]): FSFolder {
@@ -49,6 +56,10 @@ function image(name: string, parent: string, src: string): FSImageFile {
   return { type: "image", path: `${parent}/${name}`, name, src };
 }
 
+function pdf(name: string, parent: string, src: string): FSPdfFile {
+  return { type: "pdf", path: `${parent}/${name}`, name, src };
+}
+
 function shortcut(name: string, parent: string, href: string): FSShortcut {
   return { type: "shortcut", path: `${parent}/${name}`, name, href };
 }
@@ -56,7 +67,7 @@ function shortcut(name: string, parent: string, href: string): FSShortcut {
 export const ROOT: FSFolder = folder("C:", "", (root) => [
   text("README.txt", root, content.readme),
   text("About.txt", root, content.about),
-  text("Resume.txt", root, content.resume),
+  pdf("Resume.pdf", root, "/Nishanth_Jadav_Resume.pdf"),
 
   folder("Projects", root, (p) => [
     folder("Politician Trade Copier", p, (pp) => [

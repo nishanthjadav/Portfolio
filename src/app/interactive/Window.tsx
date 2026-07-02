@@ -199,6 +199,12 @@ export default function Window({ window: win, children }: Props) {
     <div
       ref={rootRef}
       onMouseDown={focus}
+      onContextMenu={(e) => {
+        // Windows are their own thing — right-clicking inside a window
+        // shouldn't open the desktop's wallpaper-picker context menu.
+        // We still let the browser show its native menu (no preventDefault).
+        e.stopPropagation();
+      }}
       className={`absolute top-0 left-0 shadow-[2px_2px_0_rgba(0,0,0,0.35)] ${
         dragging || resizing ? "select-none" : ""
       }`}
