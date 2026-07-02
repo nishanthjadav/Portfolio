@@ -118,6 +118,7 @@ const projects: Project[] = [
       { src: "/pictures/desk-watcher/main-page.png", alt: "Desk Watcher — main dashboard" },
     ],
     links: [
+      { label: "Live", href: "https://desk-watcher.vercel.app/" },
       { label: "GitHub", href: "https://github.com/nishanthjadav/Desk-Watcher" },
     ],
   },

@@ -67,6 +67,7 @@ Visualize your productivity, phone usage, lunch break length, and so on.
 * Local-only. Video never leaves your machine; only pose keypoints and
   activity labels are stored.
 
+Live:   https://desk-watcher.vercel.app/
 GitHub: https://github.com/nishanthjadav/Desk-Watcher
 `;
 
