@@ -1,5 +1,4 @@
 # Portfolio
-Personal portfolio
 
 Link: [Portfolio](https://nishanthjadav.com/)
 
