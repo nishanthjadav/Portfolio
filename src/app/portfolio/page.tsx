@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import EmailDropdown from "./EmailDropdown";
 import PortfolioNav from "./PortfolioNav";
@@ -42,7 +43,6 @@ type Project = {
 };
 
 type LifeEntry = {
-  kicker: string;
   title: string;
   span: "wide" | "narrow";
   variant: "trio" | "duo" | "split";
@@ -178,8 +178,8 @@ const life: LifeEntry[] = [
     span: "wide",
     variant: "split",
     media: [
-      { src: "/pictures/travel/travel4.jpg", alt: "Travel 4" },
-      { src: "/pictures/travel/travel5", alt: "Travel 5" },
+      { src: "/pictures/travel/travel4.jpeg", alt: "Travel 4" },
+      { src: "/pictures/travel/travel5.jpg", alt: "Travel 5" },
     ],
   },
 ];
@@ -199,10 +199,15 @@ export default function Portfolio() {
           </p>
 
           <figure className="my-10 mx-auto max-w-[620px]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src="/pictures/travel/travel3.jpg"
               alt="Travel — hero"
+              width={1240}
+              height={800}
+              quality={85}
+              priority
+              fetchPriority="high"
+              sizes="(max-width: 680px) 100vw, 620px"
               className="w-full aspect-[1.55/1] rounded-2xl object-cover shadow-[0_18px_45px_rgba(29,44,42,0.08)]"
             />
             <figcaption className="mt-4 text-center text-sm italic text-muted">
@@ -234,10 +239,12 @@ export default function Portfolio() {
               >
                 <div className="w-[120px] h-[74px] p-3 border border-hair rounded-2xl bg-white flex items-center justify-center overflow-hidden">
                   {role.logo ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
+                    <Image
                       src={role.logo.src}
                       alt={role.logo.alt}
+                      width={120}
+                      height={74}
+                      sizes="120px"
                       className="max-w-full max-h-full object-contain"
                     />
                   ) : (
@@ -290,20 +297,17 @@ export default function Portfolio() {
               const tileHeight = entry.variant === "split" ? "sm:h-[320px]" : "sm:h-[260px]";
               return (
                 <article
-                  key={entry.kicker}
+                  key={entry.title}
                   className={`${panelSpan} p-4 border border-hair rounded-[1.6rem] bg-white/60 shadow-[0_20px_45px_rgba(24,37,35,0.06)]`}
                 >
                   <div className="mb-4 px-1">
-                    <p className="text-[0.72rem] uppercase tracking-[0.12em] text-muted mb-1">
-                      {entry.kicker}
-                    </p>
                     <h3 className="text-base font-medium">{entry.title}</h3>
                   </div>
                   <div className={gridClass}>
                     {entry.media.map((m) => (
                       <div
                         key={m.src}
-                        className={`w-full aspect-[4/5] sm:aspect-auto ${tileHeight} rounded-[1.2rem] overflow-hidden bg-[#d9d0c3]`}
+                        className={`relative w-full aspect-[4/5] sm:aspect-auto ${tileHeight} rounded-[1.2rem] overflow-hidden bg-[#d9d0c3]`}
                       >
                         {m.kind === "video" ? (
                           <video
@@ -316,11 +320,13 @@ export default function Portfolio() {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
+                          <Image
                             src={m.src}
                             alt={m.alt}
-                            className="w-full h-full object-cover"
+                            fill
+                            loading="lazy"
+                            sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 420px"
+                            className="object-cover"
                           />
                         )}
                       </div>

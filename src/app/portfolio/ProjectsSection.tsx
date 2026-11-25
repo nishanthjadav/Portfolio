@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
@@ -77,13 +78,15 @@ export default function ProjectsSection({ projects }: { projects: Project[] }) {
                     type="button"
                     onClick={() => setPreview(m)}
                     aria-label={`Open ${m.alt}`}
-                    className="group w-[220px] aspect-[4/3] rounded-2xl overflow-hidden border border-hair bg-[#d9d0c3] shadow-[0_10px_25px_rgba(47,79,77,0.08)] hover:shadow-[0_16px_35px_rgba(47,79,77,0.18)] transition-shadow cursor-zoom-in"
+                    className="group relative w-[220px] aspect-[4/3] rounded-2xl overflow-hidden border border-hair bg-[#d9d0c3] shadow-[0_10px_25px_rgba(47,79,77,0.08)] hover:shadow-[0_16px_35px_rgba(47,79,77,0.18)] transition-shadow cursor-zoom-in"
                   >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                    <Image
                       src={m.src}
                       alt={m.alt}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                      fill
+                      loading="lazy"
+                      sizes="220px"
+                      className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
                     />
                   </button>
                 ))}
@@ -117,12 +120,16 @@ function PreviewOverlay({ item, onClose }: { item: MediaItem; onClose: () => voi
       >
         ✕
       </button>
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
+      <Image
         src={item.src}
         alt={item.alt}
+        width={1920}
+        height={1440}
+        quality={85}
+        priority
+        sizes="92vw"
         onClick={(e) => e.stopPropagation()}
-        className="max-w-[92vw] max-h-[88vh] rounded-lg shadow-2xl object-contain cursor-default"
+        className="w-auto h-auto max-w-[92vw] max-h-[88vh] rounded-lg shadow-2xl object-contain cursor-default"
       />
     </div>,
     document.body

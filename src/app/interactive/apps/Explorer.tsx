@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { findByPath, ROOT, type FSNode } from "../fileSystem";
 import { useWindowManager } from "../windowManager";
 
@@ -159,8 +160,14 @@ function ImagePreviewIcon({ src }: { src: string }) {
       className="w-[40px] h-[34px] overflow-hidden"
       style={{ border: "1px solid #7f9db9", background: "#fff" }}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt="" className="w-full h-full object-cover" />
+      <Image
+        src={src}
+        alt=""
+        width={40}
+        height={34}
+        sizes="40px"
+        className="w-full h-full object-cover"
+      />
     </div>
   );
 }
