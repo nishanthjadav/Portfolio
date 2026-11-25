@@ -195,7 +195,7 @@ export default function Portfolio() {
             Nishanth Jadav
           </h1>
           <p className="text-lg text-muted leading-relaxed mb-6">
-           CS + Math @ Villanova '28. 
+           CS + Math @ Villanova '28 
           </p>
 
           <figure className="my-10 mx-auto max-w-[620px]">
