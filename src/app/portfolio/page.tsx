@@ -51,17 +51,24 @@ type LifeEntry = {
 
 const experience: ExperienceEntry[] = [
   {
+    company: "Abridge",
+    title: "Member of Technical Staff Intern",
+    dates: "October 2026 – Present",
+    description: "Clinician Documentation Integrity",
+    logo: { src: "/pictures/logos/abridge-logo.png", alt: "Abridge logo" },
+  },
+  {
     company: "SAP",
     title: "Software Engineering Intern",
     dates: "May 2026 – Present",
-    description: "Cloud infrastructure.",
+    description: "Cloud infrastructure",
     logo: { src: "/pictures/logos/sap-logo.png", alt: "SAP logo" },
   },
   {
     company: "Frigate",
     title: "Software Engineering Intern",
     dates: "May 2025 – Aug 2025",
-    description: "Building fintech at a startup.",
+    description: "Building fintech at a startup",
     logo: { src: "/pictures/logos/frigate-logo.png", alt: "Frigate logo" },
   },
   {
@@ -79,7 +86,7 @@ const experience: ExperienceEntry[] = [
         >
           Villanova
         </a>{" "}
-        website.
+        website
       </>
     ),
     logo: { src: "/pictures/logos/villanova-logo.png", alt: "Villanova University logo" },
@@ -90,10 +97,10 @@ const projects: Project[] = [
   {
     name: "Politician Trade Copier",
     year: "2026",
-    description: "Congress members probably insider trade. Now, you can too.",
+    description: "Congress members probably insider trade, so we should just copy them",
     features: [
-      "Scrapes CapitolTrades daily and flags unusual trades with an Isolation Forest anomaly model.",
-      "One-click copy trading: mirrors any politician's fills into your Alpaca brokerage with live P&L.",
+      "Scrapes CapitolTrades daily and flags unusual trades with an Isolation Forest anomaly model",
+      "One-click copy trading: mirrors any politician's fills into your Alpaca brokerage with live P&L",
     ],
     media: [
       { src: "/pictures/politician-tracker/main-page.png", alt: "Politician Trade Copier — main dashboard" },
@@ -107,10 +114,10 @@ const projects: Project[] = [
   {
     name: "Desk Watcher",
     year: "2026",
-    description: "Visualize your productivity, phone usage, lunch break length, etc.",
+    description: "Visualize your productivity, phone usage, lunch break length, etc",
     features: [
-      "Fuses a MediaPipe pose classifier with YOLOv8 phone detection to log sips, breaks, and focus in real time.",
-      "Local-only. Video never leaves your machine; only pose keypoints and activity labels are stored.",
+      "Fuses a MediaPipe pose classifier with YOLOv8 phone detection to log sips, breaks, and focus in real time",
+      "Video never leaves your machine; only pose keypoints and activity labels are stored",
     ],
     media: [
       { src: "/pictures/desk-watcher/landing-page1.png", alt: "Desk Watcher — landing page" },
@@ -125,7 +132,7 @@ const projects: Project[] = [
   {
     name: "Project Euler Solutions",
     year: "2023 - Present",
-    description: "It's like Leetcode, but with more math, so it's better.",
+    description: "It's like Leetcode, but with more math",
     media: [
       { src: "/pictures/euler/progress.png", alt: "Project Euler — progress" },
       { src: "/pictures/euler/sample-problem.png", alt: "Project Euler — sample problem" },
@@ -139,8 +146,7 @@ const projects: Project[] = [
 
 const life: LifeEntry[] = [
   {
-    kicker: "Friends",
-    title: "Home base.",
+    title: "Friends",
     span: "wide",
     variant: "trio",
     media: [
@@ -150,8 +156,7 @@ const life: LifeEntry[] = [
     ],
   },
   {
-    kicker: "Badminton",
-    title: "Club Team",
+    title: "Club Badminton",
     span: "narrow",
     variant: "duo",
     media: [
@@ -160,8 +165,7 @@ const life: LifeEntry[] = [
     ],
   },
   {
-    kicker: "Food",
-    title: "Follow me on Beli: @nishanth1",
+    title: "Food (Beli: @nishanth1)",
     span: "narrow",
     variant: "duo",
     media: [
@@ -170,13 +174,12 @@ const life: LifeEntry[] = [
     ],
   },
   {
-    kicker: "Travel",
-    title: "Places lately.",
+    title: "Travel",
     span: "wide",
     variant: "split",
     media: [
-      { src: "/pictures/travel/travel1.jpg", alt: "Travel 1" },
-      { src: "/pictures/travel/travel-2.MOV", alt: "Travel — video", kind: "video" },
+      { src: "/pictures/travel/travel4.jpg", alt: "Travel 4" },
+      { src: "/pictures/travel/travel5", alt: "Travel 5" },
     ],
   },
 ];
@@ -192,7 +195,7 @@ export default function Portfolio() {
             Nishanth Jadav
           </h1>
           <p className="text-lg text-muted leading-relaxed mb-6">
-           I like building fun things. CS + Math @ Villanova '28. 
+           CS + Math @ Villanova '28. 
           </p>
 
           <figure className="my-10 mx-auto max-w-[620px]">
@@ -258,7 +261,7 @@ export default function Portfolio() {
 
         <section id="projects" className="w-[min(1400px,calc(100vw-4rem))] mx-auto py-12 border-t border-hair scroll-mt-20">
           <div className="mb-6">
-            <p className="text-xs uppercase tracking-widest text-muted mb-2">Some things I&apos;ve worked on.</p>
+            <p className="text-xs uppercase tracking-widest text-muted mb-2">Some things I&apos;ve worked on</p>
             <h2 className="text-[clamp(2rem,5vw,3.1rem)] font-medium leading-[1.05] tracking-[-0.08em]">
               Projects
             </h2>
@@ -269,7 +272,7 @@ export default function Portfolio() {
 
         <section id="life" className="w-[min(1400px,calc(100vw-4rem))] mx-auto py-12 border-t border-hair scroll-mt-20">
           <div className="mb-10">
-            <p className="text-xs uppercase tracking-widest text-muted mb-2">Outside of coding.</p>
+            <p className="text-xs uppercase tracking-widest text-muted mb-2">Outside of coding</p>
             <h2 className="text-[clamp(2rem,5vw,3.1rem)] font-medium leading-[1.05] tracking-[-0.08em]">
               Life Lately
             </h2>

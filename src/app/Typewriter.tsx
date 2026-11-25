@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-const TEXT = "Hi, I'm Nishanth.";
+const TEXT = "Hi, I'm Nishanth";
 const SPEED = 55;
 const START_DELAY = 200;
 const SEEN_KEY = "landing-seen";

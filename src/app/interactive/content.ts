@@ -30,7 +30,7 @@ I'm a current junior at Villanova ('28) double majoring in computer science and 
 I like building things that are either useful or interesting. 
 This website is trying to be both.
 
-Currently interning on cloud infrastructure at SAP. Previously interned at
+Currently interning at Abridge as a Member of Techincal Staff. Previously interned at SAP and
 Frigate (fintech, early-stage) and have been doing research + web work at
 Villanova since fall '24.
 
@@ -74,7 +74,7 @@ GitHub: https://github.com/nishanthjadav/Desk-Watcher
 export const eulerDesc = `PROJECT EULER SOLUTIONS  (2023 - Present)
 ------------------------------------------
 
-It's like Leetcode, but with more math, so it's better.
+It's like Leetcode, but with more math.
 
 Ongoing collection of solutions to problems from the Project Euler archive.
 
